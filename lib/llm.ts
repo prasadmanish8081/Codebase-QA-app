@@ -7,6 +7,8 @@ type LlmAnswer = {
 };
 
 const REQUEST_TIMEOUT_MS = 25_000;
+const MAX_SNIPPET_CHARS = 1_200;
+const MAX_TOTAL_SNIPPET_CHARS = 4_800;
 
 function hasLlmConfig(): boolean {
   const env = getEnv();
@@ -38,6 +40,27 @@ function buildHeuristicAnswer(question: string, snippets: StoredSnippet[]): LlmA
     answer: `Direct JSON answer generate nahi hua. Retrieved evidence ke basis par relevant locations: ${refs}. Question: "${question}".`,
     snippetIds: top.map((s) => s.id)
   };
+}
+
+function trimSnippetCode(code: string, maxChars = MAX_SNIPPET_CHARS): string {
+  if (code.length <= maxChars) return code;
+  return `${code.slice(0, maxChars)}\n...[truncated]`;
+}
+
+function buildSnippetBlock(snippets: StoredSnippet[]): string {
+  let used = 0;
+  const blocks: string[] = [];
+
+  for (const s of snippets) {
+    const remaining = MAX_TOTAL_SNIPPET_CHARS - used;
+    if (remaining < 250) break;
+
+    const code = trimSnippetCode(s.code, Math.min(MAX_SNIPPET_CHARS, remaining));
+    used += code.length;
+    blocks.push(`Snippet ${s.id}\nPath: ${s.path}:${s.startLine}-${s.endLine}\n\n${code}`);
+  }
+
+  return blocks.join("\n\n----\n\n");
 }
 
 async function callChat(messages: Array<{ role: "system" | "user"; content: string }>): Promise<string> {
@@ -101,9 +124,7 @@ export async function answerWithProof(question: string, snippets: StoredSnippet[
     };
   }
 
-  const snippetBlock = snippets
-    .map((s) => `Snippet ${s.id}\nPath: ${s.path}:${s.startLine}-${s.endLine}\n\n${s.code}`)
-    .join("\n\n----\n\n");
+  const snippetBlock = buildSnippetBlock(snippets);
 
   const system = [
     "You answer repository questions using only provided snippets.",
@@ -114,10 +135,23 @@ export async function answerWithProof(question: string, snippets: StoredSnippet[
   ].join(" ");
 
   const user = `Question: ${question}\n\nSnippets:\n${snippetBlock}`;
-  const content = await callChat([
-    { role: "system", content: system },
-    { role: "user", content: user }
-  ]);
+  let content = "{}";
+  try {
+    content = await callChat([
+      { role: "system", content: system },
+      { role: "user", content: user }
+    ]);
+  } catch (error) {
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    if (
+      message.includes("tokens per minute") ||
+      message.includes("rate limit") ||
+      message.includes("request too large")
+    ) {
+      return buildHeuristicAnswer(question, snippets);
+    }
+    throw error;
+  }
 
   const parsed = parseJsonFromText(content);
   if (parsed) return parsed;
