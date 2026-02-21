@@ -1,0 +1,167 @@
+:root {
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --text: #121826;
+  --muted: #5f6675;
+  --line: #d8dce7;
+  --brand: #0f766e;
+  --brand-soft: #e2f3f1;
+  --warn: #a16207;
+  --bad: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 20% 0%, #ecfff7, transparent 35%), var(--bg);
+}
+
+.app-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+}
+
+a {
+  color: var(--brand);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input,
+textarea,
+button {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  background: var(--brand);
+  color: white;
+  border: 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.danger-btn {
+  width: auto;
+  background: var(--bad);
+  padding: 8px 12px;
+}
+
+button[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.spread {
+  justify-content: space-between;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 12px;
+  padding: 3px 9px;
+}
+
+.error {
+  color: var(--bad);
+  font-size: 13px;
+}
+
+pre {
+  margin: 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.snippet-title {
+  color: var(--warn);
+  font-size: 13px;
+}
+
+.snippet-card {
+  gap: 8px;
+}
+
+.qa-item {
+  gap: 8px;
+}
+
+.page-gap-xs {
+  gap: 6px;
+}
+
+.page-gap-md {
+  gap: 16px;
+}
+
+.page-gap-lg {
+  gap: 18px;
+}
