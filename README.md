@@ -46,6 +46,12 @@ GROQ_API_KEY=your_key_here
 GROQ_MODEL=llama-3.1-8b-instant
 ```
 
+Optional:
+
+```env
+DATA_DIR=./data
+```
+
 4. Run:
 
 ```bash
@@ -91,6 +97,7 @@ npm run quality
 - Very large repositories are truncated by file count/size limits
 - Only public GitHub repositories are supported
 - No user authentication layer
+- On serverless hosts, filesystem history uses temporary storage (`/tmp`) unless you attach a real database
 
 ## Deployment (Vercel)
 

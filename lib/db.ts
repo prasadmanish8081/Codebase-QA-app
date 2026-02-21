@@ -1,8 +1,15 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { AppState, QARecord, RepoState } from "@/lib/types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+function resolveDataDir(): string {
+  if (process.env.DATA_DIR) return process.env.DATA_DIR;
+  if (process.env.VERCEL) return path.join(os.tmpdir(), "codebase-qa-proof");
+  return path.join(process.cwd(), "data");
+}
+
+const DATA_DIR = resolveDataDir();
 const DATA_FILE = path.join(DATA_DIR, "state.json");
 
 const defaultState: AppState = {
@@ -114,7 +121,7 @@ export async function healthDb(): Promise<{ ok: boolean; detail: string }> {
   try {
     await ensureDataFile();
     await readState();
-    return { ok: true, detail: "state.json reachable" };
+    return { ok: true, detail: `state.json reachable (${DATA_FILE})` };
   } catch (error) {
     return { ok: false, detail: error instanceof Error ? error.message : "db error" };
   }
